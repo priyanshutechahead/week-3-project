@@ -1,0 +1,88 @@
+# Dependencies
+
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+
+dist/
+build/
+out/
+dist-ssr/
+coverage/
+
+# Environment variables
+
+.env
+.env.*
+!.env.example
+
+# Logs
+
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Cache
+
+.cache/
+.parcel-cache/
+.eslintcache
+.vite/
+.next/
+.nuxt/
+
+# OS files
+
+.DS_Store
+Thumbs.db
+
+# IDEs and Editors
+
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*.swo
+
+# Python
+
+**pycache**/
+*.pyc
+*.pyo
+*.pyd
+.python-version
+.pytest_cache/
+.mypy_cache/
+
+# Virtual Environments
+
+venv/
+.venv/
+env/
+ENV/
+
+# FastAPI / Uvicorn
+
+*.sqlite3
+
+# Mac
+
+.AppleDouble
+.LSOverride
+
+# Misc
+
+tmp/
+temp/
+*.bak
+*.orig
