@@ -33,7 +33,7 @@ export default function InterestSeasonsPage() {
   }
 
   return (
-    <div className="bg-surface text-on-surface font-body-lg min-h-screen flex flex-col">
+    <div className="bg-surface text-on-surface font-body-lg h-screen overflow-hidden flex flex-col">
       {/* Header */}
       <header className="w-full bg-surface-container-lowest border-b border-outline-variant py-[24px] sticky top-0 z-50">
         <div className="max-w-[1280px] mx-auto px-[24px] flex flex-col items-center">
@@ -48,7 +48,7 @@ export default function InterestSeasonsPage() {
       </header>
 
       {/* Main */}
-      <main className="flex-grow flex flex-col items-center justify-center py-[64px] px-[24px] max-w-[1280px] mx-auto w-full">
+      <main className="flex-grow overflow-y-auto flex flex-col items-center py-[64px] px-[24px] max-w-[1280px] mx-auto w-full">
         <div className="text-center mb-[64px] max-w-2xl">
           <h1 className="font-display-lg text-display-lg text-on-background mb-4">When do you prefer to travel?</h1>
           <p className="text-body-lg text-on-surface-variant">Select your favorite seasons to help us curate intelligence-driven itineraries that match your climate preferences.</p>

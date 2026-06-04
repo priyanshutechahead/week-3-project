@@ -58,28 +58,22 @@ export default function InterestFloraFaunaPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col font-body-lg text-body-lg">
+    <div className="h-screen overflow-hidden flex flex-col font-body-lg text-body-lg bg-surface text-on-surface">
       {/* Header */}
-      <header className="w-full h-16 bg-surface border-b border-outline-variant flex items-center px-[24px] fixed top-0 z-50">
-        <div className="max-w-[1280px] w-full mx-auto flex justify-between items-center">
-          <span className="text-headline-md font-headline-md font-bold text-primary">Discoverly</span>
-          <div className="hidden md:flex flex-col items-end gap-1">
-            <div className="flex items-center gap-4">
-              <span className="text-label-caps font-label-caps text-secondary uppercase tracking-widest">Step 3 of 4</span>
-              <div className="w-48 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
-                <div className="w-3/4 h-full bg-primary progress-glow transition-all duration-700"></div>
-              </div>
-            </div>
-            <span className="text-body-sm font-body-sm text-on-surface-variant">Biological Interests</span>
+      <header className="w-full bg-surface-container-lowest border-b border-outline-variant py-[24px] sticky top-0 z-50">
+        <div className="max-w-[1280px] mx-auto px-[24px] flex flex-col items-center">
+          <div className="w-full flex justify-between items-center mb-4">
+            <span className="text-primary font-headline-md font-bold tracking-tight">Discoverly</span>
+            <span className="text-label-caps font-label-caps text-on-surface-variant">Step 3 of 4</span>
           </div>
-          <div className="md:hidden">
-            <span className="text-label-caps font-label-caps text-primary">3 / 4</span>
+          <div className="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+            <div className="bg-primary h-full w-3/4 transition-all duration-500 ease-out"></div>
           </div>
         </div>
       </header>
 
       {/* Main */}
-      <main className="flex-grow pt-[64px] pb-[64px] px-[24px] mt-16 max-w-[1280px] mx-auto w-full">
+      <main className="flex-grow overflow-y-auto py-[64px] px-[24px] max-w-[1280px] mx-auto w-full">
         <div className="max-w-4xl mx-auto mb-[24px] text-center">
           <h1 className="font-headline-md text-headline-md text-on-background mb-[8px]">Curate Your Biological Focus</h1>
           <p className="text-body-lg font-body-lg text-on-surface-variant max-w-2xl mx-auto">
@@ -92,9 +86,8 @@ export default function InterestFloraFaunaPage() {
           {interests.map((item, index) => (
             <div
               key={item.name}
-              className={`interest-card-hover ${item.colSpan} relative group cursor-pointer overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest ${
-                selected.has(item.name) ? 'selected-ring' : ''
-              }`}
+              className={`interest-card-hover ${item.colSpan} relative group cursor-pointer overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest ${selected.has(item.name) ? 'selected-ring' : ''
+                }`}
               onClick={() => toggleSelection(item.name)}
               style={{
                 opacity: visible.includes(index) ? 1 : 0,
@@ -120,32 +113,16 @@ export default function InterestFloraFaunaPage() {
             </div>
           ))}
         </div>
-
-        {/* Search */}
-        <div className="mt-[64px] max-w-2xl mx-auto">
-          <div className="flex flex-col gap-2">
-            <label className="text-label-caps font-label-caps text-secondary">DON&apos;T SEE YOUR INTEREST?</label>
-            <div className="relative group">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary">search</span>
-              <input className="w-full pl-12 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="Search for specific species, biomes, or botanical families..." type="text" />
-            </div>
-          </div>
-        </div>
       </main>
 
       {/* Footer */}
-      <footer className="w-full bg-surface border-t border-outline-variant py-4 px-[24px] fixed bottom-0 z-50">
-        <div className="max-w-[1280px] w-full mx-auto flex justify-between items-center">
-          <button className="flex items-center gap-2 px-6 py-2 border border-outline-variant rounded-lg text-secondary font-medium hover:bg-surface-container transition-colors active:scale-95" onClick={() => navigate('/onboarding/seasons')}>
-            <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+      <footer className="w-full bg-surface border-t border-outline-variant py-[24px] mt-auto">
+        <div className="max-w-[1280px] mx-auto px-[24px] flex justify-between items-center">
+          <button className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-medium" onClick={() => navigate('/onboarding/seasons')}>
+            <span className="material-symbols-outlined">arrow_back</span>
             <span>Back</span>
           </button>
-          <div className="hidden md:flex items-center gap-2">
-            <span className="text-body-sm text-on-surface-variant italic">Next step: Geographical Landscapes</span>
-          </div>
-          <button className="flex items-center gap-2 px-8 py-2 border border-outline-variant rounded-lg text-secondary font-medium hover:bg-surface-container transition-colors active:scale-95" onClick={() => navigate('/onboarding/landscapes')}>
-            <span>Skip</span>
-          </button>
+          <button className="text-secondary font-medium hover:text-on-surface transition-colors" onClick={() => navigate('/onboarding/landscapes')}>Skip</button>
         </div>
       </footer>
     </div>

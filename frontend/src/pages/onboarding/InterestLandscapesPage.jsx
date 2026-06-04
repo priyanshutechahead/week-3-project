@@ -23,21 +23,28 @@ export default function InterestLandscapesPage() {
   }
 
   return (
-    <div className="bg-surface text-on-surface min-h-screen flex flex-col font-body-lg">
-      <main className="flex-grow flex flex-col items-center justify-center px-[24px] py-[64px]">
+    <div className="bg-surface text-on-surface h-screen overflow-hidden flex flex-col font-body-lg">
+      {/* Header */}
+      <header className="w-full bg-surface-container-lowest border-b border-outline-variant py-[24px] sticky top-0 z-50">
+        <div className="max-w-[1280px] mx-auto px-[24px] flex flex-col items-center">
+          <div className="w-full flex justify-between items-center mb-4">
+            <span className="text-primary font-headline-md font-bold tracking-tight">Discoverly</span>
+            <span className="text-label-caps font-label-caps text-on-surface-variant">Step 4 of 4</span>
+          </div>
+          <div className="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+            <div className="bg-primary h-full w-full transition-all duration-500 ease-out"></div>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-grow overflow-y-auto flex flex-col items-center px-[24px] py-[64px]">
         <div className="w-full max-w-[1280px] mx-auto flex flex-col items-center">
-          {/* Header */}
+          {/* Main Content Header */}
           <header className="w-full max-w-[800px] text-center mb-[64px]">
-            <div className="mb-[8px]">
-              <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">Step 4 of 4</span>
-            </div>
-            <h1 className="font-headline-md text-headline-md mb-[8px] text-on-background">Geographical Landscapes</h1>
+            <h1 className="font-display-lg text-display-lg text-on-background mb-4">Geographical Landscapes</h1>
             <p className="font-body-lg text-body-lg text-secondary max-w-xl mx-auto">
               Define the environments that inspire your travel intelligence. Your preferences will tailor the AI&apos;s itinerary generation.
             </p>
-            <div className="mt-[24px] w-full max-w-md mx-auto bg-surface-container h-1 rounded-full overflow-hidden">
-              <div className="bg-primary h-full w-full transition-all duration-700 ease-out"></div>
-            </div>
           </header>
 
           {/* Landscapes Grid */}
@@ -84,19 +91,19 @@ export default function InterestLandscapesPage() {
             </div>
           </section>
 
-          {/* Navigation */}
-          <footer className="mt-[64px] w-full max-w-[800px] flex flex-col md:flex-row items-center justify-between gap-[24px]">
-            <button className="w-full md:w-auto px-10 py-3 border border-outline text-secondary font-body-lg font-medium rounded-lg hover:bg-surface-container transition-all active:scale-95 flex items-center justify-center gap-2" onClick={() => navigate('/onboarding/flora-fauna')}>
-              <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-              Back
-            </button>
-            <div className="flex-grow hidden md:block"></div>
-            <button className="w-full md:w-auto px-12 py-3 bg-primary text-white font-body-lg font-medium rounded-lg hover:opacity-90 transition-all active:scale-95 shadow-lg shadow-primary/10" onClick={() => navigate('/dashboard')}>
-              Submit
-            </button>
-          </footer>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="w-full bg-surface border-t border-outline-variant py-[24px] mt-auto">
+        <div className="max-w-[1280px] mx-auto px-[24px] flex justify-between items-center">
+          <button className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-medium" onClick={() => navigate('/onboarding/flora-fauna')}>
+            <span className="material-symbols-outlined">arrow_back</span>
+            <span>Back</span>
+          </button>
+          <button className="text-primary font-medium hover:text-on-surface transition-colors" onClick={() => navigate('/dashboard')}>Submit</button>
+        </div>
+      </footer>
     </div>
   )
 }

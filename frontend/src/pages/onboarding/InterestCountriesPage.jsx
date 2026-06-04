@@ -26,20 +26,22 @@ export default function InterestCountriesPage() {
   }
 
   return (
-    <div className="bg-surface text-on-surface font-body-lg min-h-screen flex flex-col">
+    <div className="bg-surface text-on-surface font-body-lg h-screen overflow-hidden flex flex-col">
       {/* Header */}
-      <header className="w-full h-16 flex justify-between items-center px-[24px] max-w-[1280px] mx-auto border-b border-outline-variant">
-        <span className="text-headline-md font-headline-md font-bold text-primary">Discoverly</span>
-        <div className="flex items-center gap-4">
-          <span className="text-label-caps font-label-caps text-on-surface-variant">Step 1 of 4</span>
-          <div className="w-32 h-1.5 bg-surface-container-high rounded-full overflow-hidden">
-            <div className="h-full progress-gradient w-[25%] transition-all duration-500"></div>
+      <header className="w-full bg-surface-container-lowest border-b border-outline-variant py-[24px] sticky top-0 z-50">
+        <div className="max-w-[1280px] mx-auto px-[24px] flex flex-col items-center">
+          <div className="w-full flex justify-between items-center mb-4">
+            <span className="text-primary font-headline-md font-bold tracking-tight">Discoverly</span>
+            <span className="text-label-caps font-label-caps text-on-surface-variant">Step 1 of 4</span>
+          </div>
+          <div className="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+            <div className="bg-primary h-full w-1/4 transition-all duration-500 ease-out"></div>
           </div>
         </div>
       </header>
 
       {/* Main */}
-      <main className="flex-grow flex items-center justify-center py-[64px] px-[24px]">
+      <main className="flex-grow overflow-y-auto flex justify-center py-[64px] px-[24px]">
         <div className="w-full max-w-2xl bg-surface-container-lowest border border-outline-variant p-10 rounded-xl">
           <section className="mb-[24px] text-center">
             <h1 className="text-display-lg font-display-lg text-on-surface mb-2">Where to next?</h1>
@@ -65,9 +67,8 @@ export default function InterestCountriesPage() {
             {filtered.map(country => (
               <button
                 key={country}
-                className={`px-4 py-2 border border-outline-variant rounded-full text-body-sm font-body-sm transition-all cursor-pointer hover:border-primary active:scale-95 flex items-center gap-2 ${
-                  selected.has(country) ? 'country-tag-selected' : ''
-                }`}
+                className={`px-4 py-2 border border-outline-variant rounded-full text-body-sm font-body-sm transition-all cursor-pointer hover:border-primary active:scale-95 flex items-center gap-2 ${selected.has(country) ? 'country-tag-selected' : ''
+                  }`}
                 onClick={() => toggleCountry(country)}
               >
                 {selected.has(country) && <span className="material-symbols-outlined text-[14px]">check</span>}
@@ -75,29 +76,17 @@ export default function InterestCountriesPage() {
               </button>
             ))}
           </div>
-
-          {/* Actions */}
-          <div className="flex items-center justify-between pt-[24px] border-t border-outline-variant">
-            <button className="px-6 py-3 border border-outline-variant text-secondary font-label-caps hover:bg-surface-container transition-all flex items-center gap-2 rounded-lg" onClick={() => navigate('/signup')}>
-              <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-              Back
-            </button>
-            <button className="px-10 py-3 border border-outline-variant text-secondary font-label-caps hover:bg-surface-container transition-all flex items-center gap-2 rounded-lg active:scale-95" onClick={() => navigate('/onboarding/seasons')}>
-              Skip
-            </button>
-          </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="w-full py-[24px] border-t border-outline-variant mt-auto">
-        <div className="flex flex-col md:flex-row justify-between items-center px-[24px] max-w-[1280px] mx-auto gap-4">
-          <span className="text-label-caps font-label-caps font-bold text-secondary">© 2024 Discoverly. Distilled Intelligence.</span>
-          <div className="flex gap-6">
-            <a className="text-label-caps font-label-caps text-secondary hover:text-primary transition-colors" href="#">Privacy Policy</a>
-            <a className="text-label-caps font-label-caps text-secondary hover:text-primary transition-colors" href="#">Terms of Service</a>
-            <a className="text-label-caps font-label-caps text-secondary hover:text-primary transition-colors" href="#">Support</a>
-          </div>
+      <footer className="w-full bg-surface border-t border-outline-variant py-[24px] mt-auto">
+        <div className="max-w-[1280px] mx-auto px-[24px] flex justify-between items-center">
+          <button className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-medium" onClick={() => navigate('/signup')}>
+            <span className="material-symbols-outlined">arrow_back</span>
+            <span>Back</span>
+          </button>
+          <button className="text-secondary font-medium hover:text-on-surface transition-colors" onClick={() => navigate('/onboarding/seasons')}>Skip</button>
         </div>
       </footer>
     </div>
