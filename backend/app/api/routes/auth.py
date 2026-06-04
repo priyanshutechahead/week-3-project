@@ -35,8 +35,10 @@ def signup(user: UserSignup):
         "name": user.name,
         "email": user.email,
         "password": hashed_password,
+        "mobile_number": user.mobile_number,
         "interests": [],
-        "saved_countries": []
+        "saved_countries": [],
+        "onboarding_completed": false
     }
 
     users_collection.insert_one(new_user)
@@ -77,5 +79,9 @@ def login(user: Userlogin):
 
     return {
         "access_token": token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "onboarding_completed":
+        existing_user.get(
+            "onboarding_completed", False
+        )
     }
