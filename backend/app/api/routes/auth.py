@@ -1,8 +1,13 @@
 from fastapi import APIRouter, HTTPException
-
 from app.schemas.auth_schema import UserSignup
+from app.schemas.auth_schema import Userlogin
 from app.core.db import users_collection
-from app.core.security import hash_password
+from app.core.security import(
+    hash_password,
+    verify_password,
+    create_access_token
+)
+
 
 router = APIRouter(
     prefix="/auth",
@@ -38,4 +43,39 @@ def signup(user: UserSignup):
 
     return {
         "message": "User registered successfully"
+    }
+
+@router.post("/login")
+def login(user: Userlogin):
+
+    existing_user = users_collection.find_one(
+        {"email": user.email}
+    )
+
+    if not existing_user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials"
+        )
+
+    password_correct = verify_password(
+        user.password,
+        existing_user["password"]
+    )
+
+    if not password_correct:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials"
+        )
+
+    token = create_access_token(
+        {
+            "email": existing_user["email"]
+        }
+    )
+
+    return {
+        "access_token": token,
+        "token_type": "bearer"
     }
