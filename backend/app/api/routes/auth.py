@@ -38,7 +38,7 @@ def signup(user: UserSignup):
         "mobile_number": user.mobile_number,
         "interests": [],
         "saved_countries": [],
-        "onboarding_completed": false
+        "onboarding_completed": False
     }
 
     users_collection.insert_one(new_user)
