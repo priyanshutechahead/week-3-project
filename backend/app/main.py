@@ -3,6 +3,7 @@ from app.core.db import db
 from app.api.routes.auth import router as auth_router
 from app.api.routes.users import router as user_router
 from app.api.routes.countries import router as country_router
+from app.api.routes.saved_country import router as saved_country_router
 
 
 app = FastAPI(
@@ -13,6 +14,7 @@ app = FastAPI(
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(country_router)
+app.include_router(saved_country_router)
 
 @app.get("/")
 def root():
