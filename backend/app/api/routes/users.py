@@ -1,19 +1,15 @@
 from fastapi import APIRouter, HTTPException
-from app.schemas.interest_schema import InterestRequest
 from app.core.db import users_collection
-from app.services.recommendation_service import get_recommendation
+from app.services.recommendation_service import get_recommendations
 
 router = APIRouter(
     prefix= "/user",
     tags=["User"]
 )
 
-@router.post("/interests")
-def save_interests(
-    email: str,
-    request: InterestRequest
-):
-    
+@router.get("/recommendations")
+def recommendations(email: str):
+
     user = users_collection.find_one(
         {"email": email}
     )
@@ -24,33 +20,75 @@ def save_interests(
             detail="User not found"
         )
 
-    users_collection.update_one(
-        {"email": email},
-        {
-            "$set": {
-                "interests": request.interests,
-                "onboarding_completed": True
-            }
-        }
-    )
+    user_preferences = {
 
-    return {
-        "message": "Interests saved successfully"
+        "selected_countries":
+        user.get(
+            "selected_countries",
+            []
+        ),
+
+        "preferred_seasons":
+        user.get(
+            "preferred_seasons",
+            []
+        ),
+
+        "preferred_categories":
+        user.get(
+            "preferred_categories",
+            []
+        ),
+
+        "preferred_terrains":
+        user.get(
+            "preferred_terrains",
+            []
+        )
     }
 
-@router.get("/recommendation")
-def recommendation(email: str):
-    user = users_collection.find_one(
-        {"email": email}
+    recommendations = get_recommendations(
+        user_preferences
     )
-    if not user:
-        raise HTTPException(
-            status_code = 404,
-            detail="User not found"
+
+    if not recommendations:
+
+        return {
+            "top_country": None,
+            "recommended_countries": []
+        }
+
+    # First selected country becomes hero country
+
+    if user_preferences["selected_countries"]:
+
+        top_country = (
+            user_preferences[
+                "selected_countries"
+            ][0]
         )
-    recommendations = get_recommendation(
-        user["interests"]
-    )
-    return{
-        "recommendations": recommendations
+
+    else:
+
+        top_country = (
+            recommendations[0]["country"]
+        )
+
+    recommended_countries = []
+
+    for country in recommendations:
+
+        if country["country"] != top_country:
+
+            recommended_countries.append(
+                country["country"]
+            )
+
+    return {
+
+        "top_country":
+        top_country,
+
+        "recommended_countries":
+        recommended_countries[:4]
     }

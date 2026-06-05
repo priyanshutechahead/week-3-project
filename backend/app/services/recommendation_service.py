@@ -1,23 +1,61 @@
 import json
 
-def get_recommendation(user_interest):
-    with open("app/data/countries_metadata.json", "r") as f:
-        countries = json.load(f)
-    recommendation = []
+
+def get_recommendations(user_preferences):
+
+    with open(
+        "app/data/countries_metadata.json",
+        "r"
+    ) as file:
+        countries = json.load(file)
+
+    recommendations = []
+
     for country in countries:
-        score = len(set(user_interest) & set(country["tags"]))
+
+        score = 0
+        if country["country"] in user_preferences["selected_countries"]:
+            score += 5
+
+        score += (
+            len(
+                set(user_preferences["preferred_seasons"])
+                &
+                set(country["seasons"])
+            )
+            * 2
+        )
+        score += (
+            len(
+                set(user_preferences["preferred_categories"])
+                &
+                set(country["categories"])
+            )
+            * 2
+        )
+
+        # Terrain Match
+        score += (
+            len(
+                set(user_preferences["preferred_terrains"])
+                &
+                set(country["terrains"])
+            )
+            * 1
+        )
+
         if score > 0:
-            recommendation.append(
+
+            recommendations.append(
                 {
-                    "country":  country["country"],
-                    "tags": country["tags"],
+                    "country": country["country"],
                     "score": score
                 }
             )
 
-    recommendation.sort(
-        key = lambda x: x["score"],
-        reverse = True
+    recommendations.sort(
+        key=lambda x: x["score"],
+        reverse=True
     )
 
-    return recommendation[:6]
+    return recommendations

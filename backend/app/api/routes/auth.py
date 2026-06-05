@@ -36,7 +36,10 @@ def signup(user: UserSignup):
         "email": user.email,
         "password": hashed_password,
         "mobile_number": user.mobile_number,
-        "interests": [],
+        "selected_countries":[],
+        "preferred_season":[],
+        "preferred_categories":[],
+        "preferred_terrains":[],
         "saved_countries": [],
         "onboarding_completed": False
     }
