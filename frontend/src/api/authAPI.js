@@ -15,6 +15,11 @@ export const googleLogin = async (token) => {
   return response.data;
 };
 
+export const refreshTokenRequest = async (refreshToken) => {
+  const response = await axiosInstance.post('/auth/refresh', { refresh_token: refreshToken });
+  return response.data;
+};
+
 export const getMe = async () => {
   const response = await axiosInstance.get('/users/me');
   return response.data;
