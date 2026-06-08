@@ -1,28 +1,54 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-
-const countries = [
-  "Japan", "Iceland", "Norway", "New Zealand", "Portugal", "Italy", "Greece", "Switzerland",
-  "Thailand", "Vietnam", "Canada", "Australia", "Morocco", "France", "Spain", "Mexico",
-  "South Africa", "Peru", "Chile", "Finland", "Denmark", "Scotland", "Ireland", "Germany"
-]
+import { updateMe } from '../../api/authAPI'
+import { getAllCountries } from '../../api/countryAPI'
+import useAuthStore from '../../store/authStore'
 
 export default function InterestCountriesPage() {
   const navigate = useNavigate()
+  const [countries, setCountries] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selected, setSelected] = useState(new Set())
+  const [loading, setLoading] = useState(false)
+  const [fetching, setFetching] = useState(true)
+  
+  const updateUserStore = useAuthStore((state) => state.updateUser)
+
+  useEffect(() => {
+    const loadCountries = async () => {
+      try {
+        const data = await getAllCountries()
+        // Sort alphabetically and extract common names
+        const sorted = data
+          .map(c => c.name.common)
+          .sort((a, b) => a.localeCompare(b))
+        setCountries(sorted)
+      } catch (err) {
+        console.error('Failed to fetch countries', err)
+      } finally {
+        setFetching(false)
+      }
+    }
+    loadCountries()
+  }, [])
 
   const filtered = countries.filter(c => c.toLowerCase().includes(searchTerm.toLowerCase()))
 
-  const toggleCountry = (country) => {
-    const next = new Set(selected)
-    if (next.has(country)) {
-      next.delete(country)
-    } else {
-      next.add(country)
-      setTimeout(() => navigate('/onboarding/seasons'), 400)
-    }
+  const toggleCountry = async (country) => {
+    const next = new Set([country]) // Single selection for auto-navigate
     setSelected(next)
+    
+    try {
+      const updatedUser = await updateMe({
+        interests: { countries: [country] }
+      })
+      updateUserStore(updatedUser)
+      // Small delay for visual feedback
+      setTimeout(() => navigate('/onboarding/seasons'), 400)
+    } catch (err) {
+      console.error('Failed to save country', err)
+      navigate('/onboarding/seasons')
+    }
   }
 
   return (
@@ -42,10 +68,10 @@ export default function InterestCountriesPage() {
 
       {/* Main */}
       <main className="flex-grow overflow-y-auto flex justify-center py-[64px] px-[24px]">
-        <div className="w-full max-w-2xl bg-surface-container-lowest border border-outline-variant p-10 rounded-xl">
+        <div className="w-full max-w-2xl bg-surface-container-lowest border border-outline-variant p-10 rounded-xl h-fit">
           <section className="mb-[24px] text-center">
             <h1 className="text-display-lg font-display-lg text-on-surface mb-2">Where to next?</h1>
-            <p className="text-body-lg font-body-lg text-secondary">Select the countries you&apos;re interested in exploring. We&apos;ll use this to distill intelligence for your itineraries.</p>
+            <p className="text-body-lg font-body-lg text-secondary">Select your primary country of interest. We&apos;ll use this to distill intelligence for your itineraries.</p>
           </section>
 
           {/* Search */}
@@ -63,8 +89,12 @@ export default function InterestCountriesPage() {
           </div>
 
           {/* Tags Grid */}
-          <div className="flex flex-wrap gap-3 mb-[64px] max-h-[320px] overflow-y-auto custom-scrollbar pr-2">
-            {filtered.map(country => (
+          <div className="flex flex-wrap gap-3 mb-[16px] max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+            {fetching ? (
+              <div className="w-full text-center py-8">
+                <span className="material-symbols-outlined animate-spin text-primary">progress_activity</span>
+              </div>
+            ) : filtered.map(country => (
               <button
                 key={country}
                 className={`px-4 py-2 border border-outline-variant rounded-full text-body-sm font-body-sm transition-all cursor-pointer hover:border-primary active:scale-95 flex items-center gap-2 ${selected.has(country) ? 'country-tag-selected' : ''

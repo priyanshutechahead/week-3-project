@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { updateMe } from '../../api/authAPI'
+import useAuthStore from '../../store/authStore'
 
 const seasons = [
   { name: 'Spring', icon: 'filter_vintage', months: 'March - May' },
@@ -12,6 +14,10 @@ export default function InterestSeasonsPage() {
   const navigate = useNavigate()
   const [selected, setSelected] = useState(new Set())
   const [visible, setVisible] = useState([])
+  const [loading, setLoading] = useState(false)
+  
+  const user = useAuthStore((state) => state.user)
+  const updateUserStore = useAuthStore((state) => state.updateUser)
 
   useEffect(() => {
     seasons.forEach((_, index) => {
@@ -21,15 +27,26 @@ export default function InterestSeasonsPage() {
     })
   }, [])
 
-  const toggleSelection = (name) => {
-    const next = new Set(selected)
-    if (next.has(name)) {
-      next.delete(name)
-    } else {
-      next.add(name)
-      setTimeout(() => navigate('/onboarding/flora-fauna'), 400)
-    }
+  const toggleSelection = async (name) => {
+    const next = new Set([name])
     setSelected(next)
+    
+    setLoading(true)
+    try {
+      const updatedUser = await updateMe({
+        interests: { 
+          ...user?.interests,
+          seasons: [name] 
+        }
+      })
+      updateUserStore(updatedUser)
+      setTimeout(() => navigate('/onboarding/flora-fauna'), 400)
+    } catch (err) {
+      console.error('Failed to save season', err)
+      navigate('/onboarding/flora-fauna')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -51,7 +68,7 @@ export default function InterestSeasonsPage() {
       <main className="flex-grow overflow-y-auto flex flex-col items-center py-[64px] px-[24px] max-w-[1280px] mx-auto w-full">
         <div className="text-center mb-[64px] max-w-2xl">
           <h1 className="font-display-lg text-display-lg text-on-background mb-4">When do you prefer to travel?</h1>
-          <p className="text-body-lg text-on-surface-variant">Select your favorite seasons to help us curate intelligence-driven itineraries that match your climate preferences.</p>
+          <p className="text-body-lg text-on-surface-variant">Select your preferred travel season to help us curate intelligence-driven itineraries.</p>
         </div>
 
         {/* Season Cards Grid */}

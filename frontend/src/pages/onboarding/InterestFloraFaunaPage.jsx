@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { updateMe } from '../../api/authAPI'
+import useAuthStore from '../../store/authStore'
 
 const interests = [
   {
@@ -36,6 +38,10 @@ export default function InterestFloraFaunaPage() {
   const navigate = useNavigate()
   const [selected, setSelected] = useState(new Set())
   const [visible, setVisible] = useState([])
+  const [loading, setLoading] = useState(false)
+  
+  const user = useAuthStore((state) => state.user)
+  const updateUserStore = useAuthStore((state) => state.updateUser)
 
   useEffect(() => {
     interests.forEach((_, index) => {
@@ -45,15 +51,25 @@ export default function InterestFloraFaunaPage() {
     })
   }, [])
 
-  const toggleSelection = (name) => {
-    const next = new Set(selected)
-    if (next.has(name)) {
-      next.delete(name)
-      setSelected(next)
-    } else {
-      next.add(name)
-      setSelected(next)
+  const toggleSelection = async (name) => {
+    const next = new Set([name])
+    setSelected(next)
+    
+    setLoading(true)
+    try {
+      const updatedUser = await updateMe({
+        interests: { 
+          ...user?.interests,
+          flora_fauna: [name] 
+        }
+      })
+      updateUserStore(updatedUser)
       setTimeout(() => navigate('/onboarding/landscapes'), 400)
+    } catch (err) {
+      console.error('Failed to save flora & fauna', err)
+      navigate('/onboarding/landscapes')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -77,7 +93,7 @@ export default function InterestFloraFaunaPage() {
         <div className="max-w-4xl mx-auto mb-[24px] text-center">
           <h1 className="font-headline-md text-headline-md text-on-background mb-[8px]">Curate Your Biological Focus</h1>
           <p className="text-body-lg font-body-lg text-on-surface-variant max-w-2xl mx-auto">
-            Select the ecosystems and species that drive your itinerary intelligence. Our AI will prioritize these habitats in your future expeditions.
+            Select the ecosystem or species that drives your itinerary intelligence.
           </p>
         </div>
 
