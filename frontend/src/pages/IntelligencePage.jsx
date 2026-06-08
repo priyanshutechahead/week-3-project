@@ -33,7 +33,7 @@ const feedItems = [
 ]
 
 const reports = [
-  { title: 'Japan Tech Landscape 2024', pages: '48 pages', icon: 'description' },
+  { title: 'Japan Tech Landscape 2026', pages: '48 pages', icon: 'description' },
   { title: 'Visa & Policy Guide', pages: '32 pages', icon: 'description' },
   { title: 'Cultural Intelligence Brief', pages: '24 pages', icon: 'description' },
 ]

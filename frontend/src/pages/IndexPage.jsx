@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import PublicNavbar from '../components/layout/PublicNavbar'
 import Footer from '../components/layout/Footer'
+import GlobeAnimation from '../components/ui/GlobeAnimation'
 
 export default function IndexPage() {
   const cardRefs = useRef([])
@@ -34,6 +35,7 @@ export default function IndexPage() {
       <main className="relative z-10 pt-24">
         {/* Hero Section */}
         <section className="relative min-h-[921px] flex flex-col items-center justify-center text-center px-[24px] overflow-hidden">
+          <GlobeAnimation />
           <div className="max-w-3xl space-y-[24px]">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-fixed text-on-primary-fixed text-label-caps font-label-caps uppercase tracking-wider">
               <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
@@ -45,7 +47,8 @@ export default function IndexPage() {
             <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">
               Hyper-personalized travel intelligence and global navigation tailored to your unique preferences. Real-time insights for the modern explorer.
             </p>
-            <div className="flex flex-col sm:flex-row gap-[8px] justify-center pt-[8px]">
+            <div className="flex flex-col sm:flex-row gap-[16px] justify-center pt-[8px]">
+
               <Link
                 to="/demo"
                 className="px-8 py-4 border border-outline-variant bg-surface-container-lowest text-on-surface rounded-lg font-semibold hover:bg-surface-container-low transition-all"

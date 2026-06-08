@@ -85,7 +85,7 @@ export default function ItinerariesPage() {
                   <img className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwEFMrXyolVP8lD6RvzvNwXMw26ZSG-SAvvUEjJkBdrpLAEcscKmMwOe7FAMW3uSwdhLZrAODrJI-ZSos6Nrpgectuotcvn4FzYCYQ7YqEmN-UbOUiukhwnsC0n8Six1ryvHcUnE7GsrnJMvXIwuvhzgPThQ1UBxEJGRBHe444SNEM0IaR4PNL1M01gNNcn49rVqs3s2otj6wEDLRN8cHptceBFRhaZ2iuHB-7ycT6qm_TRNDIMOQGuMTjFK4smEbo4lJYTuU-kIM" alt="Japan trip" />
                   <div className="absolute inset-0 trip-card-gradient"></div>
                   <div className="absolute bottom-4 left-4 text-white">
-                    <h4 className="font-headline-md text-lg font-semibold">14 Days in Japan - Summer 2024</h4>
+                    <h4 className="font-headline-md text-lg font-semibold">14 Days in Japan - Summer 2026</h4>
                     <div className="flex items-center gap-2 mt-1 opacity-90 text-sm">
                       <span className="material-symbols-outlined text-[16px]">calendar_today</span>
                       <span>July 12 - July 26</span>
@@ -262,7 +262,7 @@ export default function ItinerariesPage() {
         <div className="max-w-[1280px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex flex-col items-center md:items-start">
             <span className="text-label-caps font-label-caps text-on-surface-variant">Discoverly</span>
-            <p className="text-body-sm text-on-surface-variant mt-1">© 2024 Discoverly. All rights reserved.</p>
+            <p className="text-body-sm text-on-surface-variant mt-1">© 2026 Discoverly. All rights reserved.</p>
           </div>
           <div className="flex gap-8">
             <a className="text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>

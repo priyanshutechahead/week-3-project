@@ -1,89 +1,154 @@
 import { useState, useEffect, useRef } from 'react'
 import ChatAssistant from '../components/ui/ChatAssistant'
 import Footer from '../components/layout/Footer'
+import { getCountryByName, getAllCountries, getIntelligence } from '../api/countryAPI'
+import { getDestinationImage } from '../api/imageAPI'
+import { getWeatherData } from '../api/weather_service'
+import { getTravelNews } from '../api/news_service'
+import useAuthStore from '../store/authStore'
 
 const tabs = ['Tech Innovation', 'Cultural Heritage', 'Food & Cuisine', 'Cleanliness', 'Safety']
 
-const tabContent = {
+const getFallbackContent = (country) => ({
   'Tech Innovation': {
-    title: 'A Global Hub for Technology',
-    desc: "Japan leads in robotics, AI, and consumer electronics. Tokyo's Akihabara district is a pilgrimage for tech enthusiasts, while Osaka drives innovation in manufacturing.",
-    stats: [
-      { label: 'Robot Density', value: '#1 Globally' },
-      { label: 'R&D Spend', value: '3.26% GDP' },
-    ],
+    title: `Technology in ${country}`,
+    desc: `${country} is making significant strides in digital transformation and infrastructure development, fostering a unique tech ecosystem.`,
+    stats: [{ label: 'Innovation', value: 'High' }, { label: 'Tech Hubs', value: 'Growing' }],
   },
   'Cultural Heritage': {
-    title: 'Thousands of Years of History',
-    desc: "From Kyoto's 2,000+ temples to Nara's ancient deer parks, Japan's cultural depth is unmatched. Traditional arts like Ikebana and Kintsugi inspire the world.",
-    stats: [
-      { label: 'UNESCO Sites', value: '25 Total' },
-      { label: 'Temples', value: '77,000+' },
-    ],
+    title: `The Soul of ${country}`,
+    desc: `Experience the rich history and traditions that define ${country}, from historic landmarks to local craftsmanship.`,
+    stats: [{ label: 'UNESCO Sites', value: 'Multiple' }, { label: 'History', value: 'Ancient' }],
   },
   'Food & Cuisine': {
-    title: 'A Culinary Powerhouse',
-    desc: 'Japan has more Michelin-starred restaurants than any other country. From sushi and ramen to kaiseki, every meal is a meticulously crafted experience.',
-    stats: [
-      { label: 'Michelin Stars', value: '413 Restaurants' },
-      { label: 'UNESCO Food', value: 'Washoku (2013)' },
-    ],
+    title: `A Taste of ${country}`,
+    desc: `The culinary scene in ${country} is a vibrant blend of traditional recipes and modern flavors.`,
+    stats: [{ label: 'Street Food', value: 'World Class' }, { label: 'Top Dish', value: 'Local Favorite' }],
   },
   'Cleanliness': {
-    title: 'A Culture of Purity',
-    desc: "Japan's cleanliness is legendary. Public spaces are immaculate, driven by a deep cultural respect for shared environments and meticulous civic responsibility.",
-    stats: [
-      { label: 'Clean Index', value: '98/100' },
-      { label: 'Air Quality', value: 'Good (AQI 42)' },
-    ],
+    title: 'Environmental Focus',
+    desc: `Commitment to sustainability and urban maintenance is a visible priority throughout ${country}.`,
+    stats: [{ label: 'Eco Index', value: 'Verified' }, { label: 'Air Quality', value: 'Monitored' }],
   },
   'Safety': {
-    title: 'One of the Safest Countries',
-    desc: "Japan consistently ranks among the world's safest countries. Low crime rates, reliable infrastructure, and a helpful culture make solo travel remarkably easy.",
-    stats: [
-      { label: 'Safety Rank', value: '#9 Global' },
-      { label: 'Crime Rate', value: 'Very Low' },
-    ],
+    title: 'Peace of Mind',
+    desc: `${country} maintains a welcoming environment with robust safety protocols for international travelers.`,
+    stats: [{ label: 'Safety Rank', value: 'Top Tier' }, { label: 'Crime Rate', value: 'Low' }],
   },
-}
-
-const bestPlaces = [
-  {
-    name: 'Tokyo Skyline',
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCwEFMrXyolVP8lD6RvzvNwXMw26ZSG-SAvvUEjJkBdrpLAEcscKmMwOe7FAMW3uSwdhLZrAODrJI-ZSos6Nrpgectuotcvn4FzYCYQ7YqEmN-UbOUiukhwnsC0n8Six1ryvHcUnE7GsrnJMvXIwuvhzgPThQ1UBxEJGRBHe444SNEM0IaR4PNL1M01gNNcn49rVqs3s2otj6wEDLRN8cHptceBFRhaZ2iuHB-7ycT6qm_TRNDIMOQGuMTjFK4smEbo4lJYTuU-kIM',
-  },
-  {
-    name: 'Kyoto Gardens',
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB7nEY3MwfxhQ3m_vHcEWHpqXKSdCqxMFSX3fBqcGkSE1_0plpZwi83qSEcpFqSzR6Qp4RTJaqvJ5H3gDLfmFg_HjXTwPPHLQ86jj2rGIKC4g3yLLaE8XYpHIcjPiAA_mYkJgxYKBPqnPqUxDxQ3FWLSGQk-6b2ZPjC-hk7cfXTU7XDMHQ9a8r1DSTu-G-eylCL2wEqJODPwb6Z4JK8dNdDQkEDpVDGLjl-GkD9GxEYQajq74RZJrMhpOuMSC3amYqMi0wdO7Mg',
-  },
-  {
-    name: 'Mt. Fuji',
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAyHwMl0xyObMeRt-QPOoNcUH9gBuujvXbdp-BZp7hTLolQfdUW2cQ9rvA7_K3E6aoaKCPx3wvTMkF2yUpNfjw4C4SjZR4LkO2UhVuZ8lqhqVP83M_nvykKKawTmJ1yDXl-TNBFZsOhZQp-e62rqt17Q-FAVGeUHPiv2hWeXRDiMDV-irX8Q2zOUvORCRX-iBikouioAdc-whK9TFpzpL-TMu2QuUM9Z0PFfuhflfFQhTWP-hxdSKmPSLEauwDbjtJQEgSZlnAL9HA',
-  },
-  {
-    name: 'Osaka Streets',
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDqt4A-h9dWonQDG1WNhNR21Lb-B0kbk8E6nfv3xbpJWw7kN6FXN-B7d_7yC9SB7DXZL_2lGfUFpUHFdVFLJPtCJBYA3Sxr3WW-EIx0kEKwkpZCe2HY2yyY-bWBqbsyXO1WzWLCbS-Af7LGP_8f2dP0L81tA7Cs2Yt3nPoUOPT_ffQ3xCl4ZJGtZqfRmPxfVxVGjQM3prgTJTwONvZeNJB8RU6yzBqjLU-a1hLWvSAGxDkuJpqXR1HKRHHofwsJDa0oJiJGeSeg',
-  },
-]
+})
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('Tech Innovation')
   const [time, setTime] = useState('')
   const [showModal, setShowModal] = useState(false)
+  const [countryData, setCountryData] = useState(null)
+  const [weather, setWeather] = useState(null)
+  const [news, setNews] = useState([])
+  const [aiIntelligence, setAiIntelligence] = useState(null)
+  const [heroImage, setHeroImage] = useState('')
+  const [carouselPlaces, setCarouselPlaces] = useState([])
+  const [showCountrySelector, setShowCountrySelector] = useState(false)
+  const [allCountries, setCountriesList] = useState([])
+  const [countrySearch, setCountrySearch] = useState('')
+  const [usdRate, setUsdRate] = useState(null)
+
+  const user = useAuthStore((state) => state.user)
+  const [currentCountry, setCurrentCountry] = useState('Japan')
   const placesRef = useRef(null)
+
+  const activeContent = aiIntelligence ? aiIntelligence[activeTab] : getFallbackContent(currentCountry)[activeTab]
+
+  useEffect(() => {
+    if (user?.interests?.countries?.[0]) {
+      setCurrentCountry(user.interests.countries[0])
+    }
+  }, [user])
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const data = await getAllCountries()
+        if (data) setCountriesList(data.map(c => c.name.common).sort())
+      } catch (err) {
+        console.error('Error fetching countries list:', err)
+      }
+    }
+    fetchCountries()
+  }, [])
+
+  useEffect(() => {
+    const fetchRates = async () => {
+      try {
+        const response = await fetch('https://open.er-api.com/v6/latest/USD')
+        const data = await response.json()
+        setUsdRate(data.rates)
+      } catch (err) {
+        console.error('Error fetching exchange rates:', err)
+      }
+    }
+    fetchRates()
+  }, [])
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      if (!currentCountry) return;
+
+      try {
+        const cData = await getCountryByName(currentCountry);
+        setCountryData(cData);
+
+        const [heroImg, place1, place2, place3, place4] = await Promise.all([
+          getDestinationImage(`${currentCountry} landscape`).catch(() => null),
+          getDestinationImage(`${currentCountry} city skyline`).catch(() => null),
+          getDestinationImage(`${currentCountry} nature`).catch(() => null),
+          getDestinationImage(`${currentCountry} landmark`).catch(() => null),
+          getDestinationImage(`${currentCountry} street`).catch(() => null),
+        ]);
+
+        if (heroImg) setHeroImage(heroImg);
+        setCarouselPlaces([
+          { name: 'Capital View', img: place1 },
+          { name: 'Natural Wonders', img: place2 },
+          { name: 'Historic Landmarks', img: place3 },
+          { name: 'Urban Life', img: place4 },
+        ]);
+
+        getTravelNews(currentCountry).then(data => setNews(data ? data.slice(0, 4) : [])).catch(e => console.error("News error", e));
+        getIntelligence(currentCountry).then(data => setAiIntelligence(data)).catch(e => console.error("AI error", e));
+
+        if (cData && cData.capital && cData.capital.length > 0) {
+          getWeatherData(cData.capital[0]).then(wData => setWeather(wData)).catch(e => console.error("Weather error", e));
+        }
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+      }
+    };
+    loadDashboardData();
+  }, [currentCountry]);
 
   useEffect(() => {
     const updateTime = () => {
       const now = new Date()
-      const jstOffset = 9 * 60
-      const utcMs = now.getTime() + now.getTimezoneOffset() * 60000
-      const jst = new Date(utcMs + jstOffset * 60000)
-      setTime(jst.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }))
+      let targetTime = now;
+      if (countryData?.timezones?.[0]) {
+        const offsetString = countryData.timezones[0];
+        const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+        const offsetPart = offsetString.replace('UTC', '');
+        if (offsetPart) {
+          const sign = offsetPart.startsWith('-') ? -1 : 1;
+          const parts = offsetPart.replace(/[+-]/, '').split(':').map(Number);
+          const hours = parts[0];
+          const minutes = parts[1] || 0;
+          const totalOffsetMs = sign * ((hours * 3600000) + (minutes * 60000));
+          targetTime = new Date(utc + totalOffsetMs);
+        }
+      }
+      setTime(targetTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }))
     }
     updateTime()
     const interval = setInterval(updateTime, 1000)
     return () => clearInterval(interval)
-  }, [])
+  }, [countryData])
 
   useEffect(() => {
     const handleEsc = (e) => { if (e.key === 'Escape') setShowModal(false) }
@@ -97,79 +162,220 @@ export default function DashboardPage() {
     }
   }
 
-  const activeContent = tabContent[activeTab]
+  const filteredCountries = allCountries.filter(c =>
+    c.toLowerCase().includes(countrySearch.toLowerCase())
+  )
+
+  const selectCountry = (name) => {
+    setCurrentCountry(name)
+    setShowCountrySelector(false)
+    setCountrySearch('')
+  }
 
   return (
     <div className="min-h-screen">
-      {/* Content */}
       <div className="p-[24px] max-w-[1280px] mx-auto">
-        {/* Welcome & Persona */}
         <div className="mb-[24px]">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-label-caps font-label-caps text-primary">CURATED FOR YOU</p>
-              <h2 className="font-headline-md text-headline-md text-on-surface mt-1">Good Morning, John.</h2>
+              <h2 className="font-headline-md text-headline-md text-on-surface mt-1">Good Morning, {user?.name?.split(' ')[0] || 'Explorer'}.</h2>
             </div>
-            <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
-              <span className="material-symbols-outlined text-primary text-[18px]">flag</span>
-              <span className="text-body-sm font-medium">Japan</span>
-              <span className="material-symbols-outlined text-[16px] text-outline">expand_more</span>
+            <div className="relative">
+              <div
+                onClick={() => setShowCountrySelector(!showCountrySelector)}
+                className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors"
+              >
+                {countryData?.flags?.svg ? (
+                  <img src={countryData.flags.svg} alt="flag" className="w-5 h-3.5 object-cover rounded-[2px]" />
+                ) : (
+                  <span className="material-symbols-outlined text-primary text-[18px]">flag</span>
+                )}
+                <span className="text-body-sm font-medium">{currentCountry}</span>
+                <span className="material-symbols-outlined text-[16px] text-outline">expand_more</span>
+              </div>
+
+              {showCountrySelector && (
+                <div className="absolute right-0 mt-2 w-64 bg-surface border border-outline-variant rounded-xl shadow-xl z-[100] overflow-hidden">
+                  <div className="p-2 border-b border-outline-variant bg-surface-container-low">
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 bg-white border border-outline-variant rounded-lg text-sm focus:outline-none focus:border-primary"
+                      placeholder="Search countries..."
+                      autoFocus
+                      value={countrySearch}
+                      onChange={(e) => setCountrySearch(e.target.value)}
+                    />
+                  </div>
+                  <div className="max-h-60 overflow-y-auto">
+                    {filteredCountries.length > 0 ? (
+                      filteredCountries.map(name => (
+                        <div
+                          key={name}
+                          onClick={() => selectCountry(name)}
+                          className="px-4 py-2 text-sm hover:bg-primary-fixed cursor-pointer transition-colors text-on-surface"
+                        >
+                          {name}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-4 py-3 text-sm text-secondary italic">No countries found</div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-          <div className="mt-4 bg-primary-fixed/30 border border-primary/10 px-6 py-3 rounded-xl flex items-center gap-3">
-            <span className="material-symbols-outlined text-primary">verified_user</span>
-            <p className="text-body-sm text-on-surface-variant">Tailored for your <strong className="text-primary">Tech Explorer Persona</strong> — All data is curated through a technology-centric lens.</p>
           </div>
         </div>
 
-        {/* Hero Country Card */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-[24px] mb-[24px]">
           <div className="lg:col-span-7 relative rounded-2xl overflow-hidden group">
-            <img alt="Japan scenic" className="w-full h-[380px] object-cover transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVX8teFbpg6QxgNc32g33Fm3y0R0EGBxZjfB6fxJ12SXOI8TZxN0pS1MbJT1IwPE3LOUNy-Cfa1LuWB6TBvpEz0jjQp8RM_zV3VyNLIeqYVB3B9FW7uipIZ-mLMEAyJpnIIlvGDHxLthBJLBfnxZ1sKS48f5yBGHf-pFNGJuIiVR2yvZqwKqPfYqg4M3ypv2ygH64DmtLAuoNfKbSh-3P5mWaUDXCAzDQHMF2yyxjXYLdPWCGHLzr-rQNh-0pZ_4LJjT7r6d6GlM" />
+            <img alt={`${currentCountry} scenic`} className="w-full h-[380px] object-cover transition-transform duration-700 group-hover:scale-105" src={heroImage || 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop'} />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
             <div className="absolute bottom-0 left-0 right-0 p-8">
               <span className="text-label-caps text-white/80 uppercase">Currently Exploring</span>
-              <h1 className="text-4xl text-white font-bold font-headline-md mt-1">Japan</h1>
-              <p className="text-white/80 mt-2 max-w-lg">A land where ancient traditions meet cutting-edge innovation. Your personalized intelligence feed is active.</p>
+              <h1 className="text-4xl text-white font-bold font-headline-md mt-1">{currentCountry}</h1>
+              <p className="text-white/80 mt-2 max-w-lg">Discovering the unique blend of tradition and modernity in {currentCountry}. Your personalized intelligence feed is active.</p>
             </div>
           </div>
-          <div className="lg:col-span-5 grid grid-cols-2 gap-4">
-            {['Tokyo', 'Kyoto', 'Osaka', 'Sapporo'].map((city) => (
-              <div key={city} className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition-shadow cursor-pointer">
-                <span className="material-symbols-outlined text-primary mb-2">location_city</span>
-                <h4 className="font-medium">{city}</h4>
-                <p className="text-label-caps text-on-surface-variant mt-1">Explore</p>
-              </div>
-            ))}
-            <div className="col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex justify-between items-center">
-              <div>
-                <p className="text-label-caps text-on-surface-variant">Population</p>
-                <p className="text-headline-md font-headline-md">125.7M</p>
-              </div>
-              <div>
-                <p className="text-label-caps text-on-surface-variant">Language</p>
-                <p className="text-headline-md font-headline-md">Japanese</p>
-              </div>
-              <div>
-                <p className="text-label-caps text-on-surface-variant">Currency</p>
-                <p className="text-headline-md font-headline-md">JPY ¥</p>
-              </div>
+          <div className="lg:col-span-5 flex flex-col gap-4">
+            <div className="grid grid-cols-2 gap-4 flex-1">
+              {['Must Visit', 'Hidden Gems', 'Local Eats', 'Active Life'].map((cat) => (
+                <div key={cat} className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition-shadow cursor-pointer">
+                  <span className="material-symbols-outlined text-primary mb-2">explore</span>
+                  <h4 className="font-medium">{cat}</h4>
+                  <p className="text-label-caps text-on-surface-variant mt-1">Explore</p>
+                </div>
+              ))}
+            </div>
+            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-0 h-[180px] overflow-hidden relative group">
+              <iframe
+                width="100%"
+                height="100%"
+                frameBorder="0"
+                style={{ border: 0 }}
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(currentCountry)}&output=embed`}
+                allowFullScreen
+                className="grayscale opacity-60 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-700"
+              ></iframe>
+
+              <a
+                href={countryData?.maps?.googleMaps || '#'}
+                target="_blank"
+                rel="noreferrer"
+                className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-[10px] font-bold border border-outline-variant text-on-surface hover:text-primary transition-colors"
+              >
+                View on Google Maps
+              </a>
+              <div className="absolute inset-0 bg-primary/5 pointer-events-none group-hover:opacity-0 transition-opacity"></div>
             </div>
           </div>
         </section>
 
-        {/* Why People Love Japan — Tabs */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-[24px] mb-[24px]">
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex justify-between items-center shadow-sm">
+            <div>
+              <p className="text-label-caps text-on-surface-variant">Population</p>
+              <p className="text-headline-md font-headline-md">
+                {countryData ? (countryData.population > 1000000 ? (countryData.population / 1000000).toFixed(1) + 'M' : (countryData.population / 1000).toFixed(0) + 'K') : '--'}
+              </p>
+            </div>
+            <span className="material-symbols-outlined text-primary/30 text-4xl">groups</span>
+          </div>
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex justify-between items-center shadow-sm">
+            <div>
+              <p className="text-label-caps text-on-surface-variant">Language</p>
+              <p className="text-headline-md font-headline-md">
+                {countryData ? Object.values(countryData.languages)[0] : '--'}
+              </p>
+            </div>
+            <span className="material-symbols-outlined text-primary/30 text-4xl">translate</span>
+          </div>
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex justify-between items-center shadow-sm">
+            <div>
+              <p className="text-label-caps text-on-surface-variant">Main Currency</p>
+              <p className="text-headline-md font-headline-md truncate max-w-[120px]">
+                {countryData ? `${Object.keys(countryData.currencies)[0]} (${Object.values(countryData.currencies)[0].symbol})` : '--'}
+              </p>
+            </div>
+            <span className="material-symbols-outlined text-primary/30 text-4xl">payments</span>
+          </div>
+        </section>
+
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[24px] mb-[24px]">
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-[24px]">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="material-symbols-outlined text-primary">cloud</span>
+              <span className="font-label-caps text-label-caps text-on-surface-variant">Weather</span>
+            </div>
+            <p className="text-[40px] font-bold text-on-surface leading-none">
+              {weather ? `${Math.round(weather.main.temp)}°C` : '24°C'}
+            </p>
+            <p className="text-body-sm text-on-surface-variant mt-1 capitalize">
+              {weather ? `${weather.weather[0].description} — ${weather.name}` : `Partly Cloudy — ${currentCountry}`}
+            </p>
+          </div>
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-[24px]">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="material-symbols-outlined text-primary">air</span>
+              <span className="font-label-caps text-label-caps text-on-surface-variant">Humidity</span>
+            </div>
+            <div className="relative w-24 h-24 mx-auto my-4">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                <circle className="stroke-surface-container-high" cx="18" cy="18" fill="none" r="15.9155" strokeWidth="2"></circle>
+                <circle className="stroke-emerald-500" cx="18" cy="18" fill="none" r="15.9155" strokeDasharray={`${weather ? weather.main.humidity : 54}, 100`} strokeLinecap="round" strokeWidth="2"></circle>
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-2xl font-bold text-emerald-500">{weather ? weather.main.humidity : 54}%</span>
+              </div>
+            </div>
+            <p className="text-center text-body-sm text-emerald-600 font-semibold">Conditions Optimal</p>
+          </div>
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-[24px]">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary">currency_exchange</span>
+                <span className="font-label-caps text-label-caps text-on-surface-variant">Exchange</span>
+              </div>
+              <span className="text-[10px] font-bold bg-primary-fixed px-1.5 py-0.5 rounded text-primary">LIVE</span>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center bg-surface-container-low p-2 rounded-lg border border-outline-variant/30">
+                <span className="text-xs font-bold text-on-surface-variant">1 USD</span>
+                <span className="material-symbols-outlined text-[14px] text-outline">arrow_forward</span>
+                <span className="text-xs font-bold text-primary">
+                  {countryData && usdRate ? (
+                    `${usdRate[Object.keys(countryData.currencies)[0]]?.toFixed(2) || '--'} ${Object.keys(countryData.currencies)[0]}`
+                  ) : '--'}
+                </span>
+              </div>
+              <p className="text-[10px] text-on-surface-variant text-center opacity-70">
+                Official Currency: {countryData ? Object.values(countryData.currencies)[0].name : '--'}
+              </p>
+            </div>
+          </div>
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-[24px]">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="material-symbols-outlined text-primary">schedule</span>
+              <span className="font-label-caps text-label-caps text-on-surface-variant">Local Time</span>
+            </div>
+            <p className="text-[40px] font-bold text-on-surface leading-none font-mono">{time || '--:--:--'}</p>
+            <p className="text-body-sm text-on-surface-variant mt-1 truncate">
+              {countryData?.timezones?.[0] || 'Real-time update'}
+            </p>
+          </div>
+        </section>
+
         <section className="mb-[24px]">
-          <h3 className="font-headline-md text-headline-md text-on-surface mb-6">Why People Love Japan</h3>
+          <h3 className="font-headline-md text-headline-md text-on-surface mb-6">Why People Love {currentCountry}</h3>
           <div className="flex gap-2 mb-6 overflow-x-auto no-scrollbar">
             {tabs.map(tab => (
               <button
                 key={tab}
-                className={`px-4 py-2 rounded-full text-body-sm font-medium whitespace-nowrap transition-all ${
-                  activeTab === tab
+                className={`px-4 py-2 rounded-full text-body-sm font-medium whitespace-nowrap transition-all ${activeTab === tab
                     ? 'bg-primary text-white shadow-sm'
                     : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
-                }`}
+                  }`}
                 onClick={() => setActiveTab(tab)}
               >
                 {tab}
@@ -190,10 +396,9 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* Best Places Carousel */}
         <section className="mb-[24px]">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="font-headline-md text-headline-md text-on-surface">Best Places to Visit</h3>
+            <h3 className="font-headline-md text-headline-md text-on-surface">Best Places in {currentCountry}</h3>
             <div className="flex gap-2">
               <button className="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container-low transition-colors" onClick={() => scrollPlaces(-1)}>
                 <span className="material-symbols-outlined text-[18px]">chevron_left</span>
@@ -204,14 +409,13 @@ export default function DashboardPage() {
             </div>
           </div>
           <div ref={placesRef} className="flex gap-[24px] overflow-x-auto no-scrollbar pb-4">
-            {bestPlaces.map((place, index) => (
+            {carouselPlaces.map((place, index) => (
               <div
-                key={place.name}
+                key={index}
                 className="min-w-[280px] rounded-xl overflow-hidden border border-outline-variant group cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => { if (index === 2) setShowModal(true) }}
               >
                 <div className="relative h-48 overflow-hidden">
-                  <img alt={place.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src={place.img} />
+                  <img alt={place.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src={place.img || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop'} />
                 </div>
                 <div className="p-4 bg-surface-container-lowest">
                   <h4 className="font-medium text-on-surface">{place.name}</h4>
@@ -221,106 +425,31 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* Real-Time Feed */}
         <section className="mb-[24px]">
           <h3 className="font-headline-md text-headline-md text-on-surface mb-6">Real-Time Intelligence Feed</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-[24px]">
-            {[
-              { cat: 'Tech', title: 'Tokyo unveils new AI-powered transit navigation system', time: '2h ago', color: 'bg-blue-100 text-blue-800' },
-              { cat: 'Travel', title: 'Japan eases visa requirements for 15 more countries', time: '4h ago', color: 'bg-emerald-100 text-emerald-800' },
-              { cat: 'Culture', title: 'Kyoto launches digital preservation of 200 historic temples', time: '6h ago', color: 'bg-amber-100 text-amber-800' },
-              { cat: 'Economy', title: 'Yen strengthens against USD amid policy changes', time: '8h ago', color: 'bg-purple-100 text-purple-800' },
-            ].map(item => (
-              <div key={item.title} className="bg-surface-container-lowest border border-outline-variant rounded-xl p-[24px] flex items-start gap-4 group cursor-pointer hover:shadow-md transition-shadow">
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${item.color}`}>{item.cat}</span>
-                <div className="flex-1">
-                  <h4 className="font-medium text-on-surface group-hover:text-primary transition-colors">{item.title}</h4>
-                  <p className="text-body-sm text-on-surface-variant mt-1">{item.time}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Intelligence Widgets */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[24px] mb-[24px]">
-          {/* Weather */}
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-[24px]">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="material-symbols-outlined text-primary">cloud</span>
-              <span className="font-label-caps text-label-caps text-on-surface-variant">Weather</span>
-            </div>
-            <p className="text-[40px] font-bold text-on-surface leading-none">22°C</p>
-            <p className="text-body-sm text-on-surface-variant mt-1">Partly Cloudy — Tokyo</p>
-          </div>
-          {/* Air Quality */}
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-[24px]">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="material-symbols-outlined text-primary">air</span>
-              <span className="font-label-caps text-label-caps text-on-surface-variant">Air Quality</span>
-            </div>
-            <div className="relative w-24 h-24 mx-auto my-4">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                <circle className="stroke-surface-container-high" cx="18" cy="18" fill="none" r="15.9155" strokeWidth="2"></circle>
-                <circle className="stroke-emerald-500" cx="18" cy="18" fill="none" r="15.9155" strokeDasharray="42, 100" strokeLinecap="round" strokeWidth="2"></circle>
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-2xl font-bold text-emerald-500">42</span>
-              </div>
-            </div>
-            <p className="text-center text-body-sm text-emerald-600 font-semibold">Good</p>
-          </div>
-          {/* Currency */}
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-[24px]">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="material-symbols-outlined text-primary">currency_exchange</span>
-              <span className="font-label-caps text-label-caps text-on-surface-variant">Currency</span>
-            </div>
-            <p className="text-[40px] font-bold text-on-surface leading-none">¥155.2</p>
-            <p className="text-body-sm text-on-surface-variant mt-1">per $1 USD</p>
-          </div>
-          {/* Live Clock */}
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-[24px]">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="material-symbols-outlined text-primary">schedule</span>
-              <span className="font-label-caps text-label-caps text-on-surface-variant">JST Time</span>
-            </div>
-            <p className="text-[40px] font-bold text-on-surface leading-none font-mono">{time || '--:--:--'}</p>
-            <p className="text-body-sm text-on-surface-variant mt-1">Japan Standard Time</p>
-          </div>
-        </section>
-      </div>
-
-      <Footer variant="dashboard" />
-
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowModal(false)}>
-          <div className="bg-surface rounded-2xl max-w-2xl w-full mx-4 overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-center p-6 border-b border-outline-variant">
-              <h3 className="font-headline-md text-headline-md">Mt. Fuji — Virtual Tour</h3>
-              <button className="p-1 hover:bg-surface-container rounded-full" onClick={() => setShowModal(false)}>
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            <div className="p-6">
-              <img alt="Mt. Fuji" className="w-full h-64 object-cover rounded-xl mb-6" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAyHwMl0xyObMeRt-QPOoNcUH9gBuujvXbdp-BZp7hTLolQfdUW2cQ9rvA7_K3E6aoaKCPx3wvTMkF2yUpNfjw4C4SjZR4LkO2UhVuZ8lqhqVP83M_nvykKKawTmJ1yDXl-TNBFZsOhZQp-e62rqt17Q-FAVGeUHPiv2hWeXRDiMDV-irX8Q2zOUvORCRX-iBikouioAdc-whK9TFpzpL-TMu2QuUM9Z0PFfuhflfFQhTWP-hxdSKmPSLEauwDbjtJQEgSZlnAL9HA" />
-              <p className="text-body-lg text-on-surface-variant mb-6">
-                Mount Fuji, at 3,776 meters, is Japan&apos;s highest peak and most iconic landmark. Experience the sunrise from its summit or explore the Five Lakes region at its base.
-              </p>
-              <div className="grid grid-cols-3 gap-4">
-                {['Sunrise Trek', 'Five Lakes', 'Chureito Pagoda'].map(title => (
-                  <div key={title} className="bg-surface-container-low rounded-lg p-3 text-center cursor-pointer hover:bg-surface-container transition-colors">
-                    <span className="material-symbols-outlined text-primary mb-1">play_circle</span>
-                    <p className="text-body-sm font-medium">{title}</p>
+            {news.length > 0 ? (
+              news.map((item, idx) => (
+                <a key={idx} href={item.url} target="_blank" rel="noreferrer" className="bg-surface-container-lowest border border-outline-variant rounded-xl p-[24px] flex items-start gap-4 group cursor-pointer hover:shadow-md transition-shadow">
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${idx % 2 === 0 ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                    {item.source.name}
+                  </span>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-on-surface group-hover:text-primary transition-colors line-clamp-2">{item.title}</h4>
+                    <p className="text-body-sm text-on-surface-variant mt-1">{new Date(item.publishedAt).toLocaleDateString()}</p>
                   </div>
-                ))}
+                </a>
+              ))
+            ) : (
+              <div className="col-span-2 py-10 text-center text-secondary">
+                <span className="material-symbols-outlined animate-spin mb-2">progress_activity</span>
+                <p>Distilling intelligence feed...</p>
               </div>
-            </div>
+            )}
           </div>
-        </div>
-      )}
+        </section>
 
+      </div>
       <ChatAssistant />
     </div>
   )
