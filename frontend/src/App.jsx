@@ -11,6 +11,7 @@ import InterestSeasonsPage from './pages/onboarding/InterestSeasonsPage'
 import InterestFloraFaunaPage from './pages/onboarding/InterestFloraFaunaPage'
 import InterestLandscapesPage from './pages/onboarding/InterestLandscapesPage'
 import DashboardLayout from './components/layout/DashboardLayout'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
   return (
@@ -21,17 +22,20 @@ function App() {
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/demo" element={<DemoPage />} />
 
-      {/* Onboarding Flow */}
-      <Route path="/onboarding/countries" element={<InterestCountriesPage />} />
-      <Route path="/onboarding/seasons" element={<InterestSeasonsPage />} />
-      <Route path="/onboarding/flora-fauna" element={<InterestFloraFaunaPage />} />
-      <Route path="/onboarding/landscapes" element={<InterestLandscapesPage />} />
+      {/* Protected Routes */}
+      <Route element={<ProtectedRoute />}>
+        {/* Onboarding Flow */}
+        <Route path="/onboarding/countries" element={<InterestCountriesPage />} />
+        <Route path="/onboarding/seasons" element={<InterestSeasonsPage />} />
+        <Route path="/onboarding/flora-fauna" element={<InterestFloraFaunaPage />} />
+        <Route path="/onboarding/landscapes" element={<InterestLandscapesPage />} />
 
-      {/* Dashboard Pages (with sidebar layout) */}
-      <Route element={<DashboardLayout />}>
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/intelligence" element={<IntelligencePage />} />
-        <Route path="/itineraries" element={<ItinerariesPage />} />
+        {/* Dashboard Pages (with sidebar layout) */}
+        <Route element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/intelligence" element={<IntelligencePage />} />
+          <Route path="/itineraries" element={<ItinerariesPage />} />
+        </Route>
       </Route>
     </Routes>
   )
