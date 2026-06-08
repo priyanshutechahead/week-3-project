@@ -20,7 +20,7 @@ export default function SignInPage() {
     setError('')
     try {
       const data = await login({ email, password })
-      setAuth(data.user, data.access_token)
+      setAuth(data.user, data.access_token, data.refresh_token)
       navigate('/dashboard')
     } catch (err) {
       setError(err.response?.data?.detail || 'Login failed. Please check your credentials.')
@@ -35,7 +35,7 @@ export default function SignInPage() {
     try {
       const idToken = await signInWithGoogle()
       const data = await googleLogin(idToken)
-      setAuth(data.user, data.access_token)
+      setAuth(data.user, data.access_token, data.refresh_token)
       if (data.is_new_user) {
         navigate('/onboarding/countries')
       } else {

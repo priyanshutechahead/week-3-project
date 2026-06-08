@@ -28,7 +28,7 @@ export default function SignUpPage() {
     setError('')
     try {
       const data = await signup(formData)
-      setAuth(data.user, data.access_token)
+      setAuth(data.user, data.access_token, data.refresh_token)
       // Navigate to the 4-step interest onboarding flow
       navigate('/onboarding/countries')
     } catch (err) {
@@ -44,7 +44,7 @@ export default function SignUpPage() {
     try {
       const idToken = await signInWithGoogle()
       const data = await googleLogin(idToken)
-      setAuth(data.user, data.access_token)
+      setAuth(data.user, data.access_token, data.refresh_token)
       if (data.is_new_user) {
         navigate('/onboarding/countries')
       } else {
