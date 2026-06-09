@@ -10,6 +10,7 @@ import InterestCountriesPage from './pages/onboarding/InterestCountriesPage'
 import InterestSeasonsPage from './pages/onboarding/InterestSeasonsPage'
 import InterestFloraFaunaPage from './pages/onboarding/InterestFloraFaunaPage'
 import InterestLandscapesPage from './pages/onboarding/InterestLandscapesPage'
+import RecommendationDashboardPage from './pages/RecommendationDashboardPage'
 import DashboardLayout from './components/layout/DashboardLayout'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -29,6 +30,9 @@ function App() {
         <Route path="/onboarding/seasons" element={<InterestSeasonsPage />} />
         <Route path="/onboarding/flora-fauna" element={<InterestFloraFaunaPage />} />
         <Route path="/onboarding/landscapes" element={<InterestLandscapesPage />} />
+        
+        {/* Recommendation Dashboard */}
+        <Route path="/recommendation" element={<RecommendationDashboardPage />} />
 
         {/* Dashboard Pages (with sidebar layout) */}
         <Route element={<DashboardLayout />}>
