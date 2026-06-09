@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import ChatAssistant from '../components/ui/ChatAssistant'
 import Footer from '../components/layout/Footer'
 import { getCountryByName, getAllCountries, getIntelligence } from '../api/countryAPI'
@@ -58,11 +59,15 @@ export default function DashboardPage() {
 
   const activeContent = aiIntelligence ? aiIntelligence[activeTab] : getFallbackContent(currentCountry)[activeTab]
 
+  const location = useLocation()
+
   useEffect(() => {
-    if (user?.interests?.countries?.[0]) {
+    if (location.state?.selectedCountry) {
+      setCurrentCountry(location.state.selectedCountry)
+    } else if (user?.interests?.countries?.[0]) {
       setCurrentCountry(user.interests.countries[0])
     }
-  }, [user])
+  }, [user, location.state])
 
   useEffect(() => {
     const fetchCountries = async () => {
