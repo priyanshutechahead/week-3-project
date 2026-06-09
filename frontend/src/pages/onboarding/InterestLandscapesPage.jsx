@@ -55,10 +55,10 @@ export default function InterestLandscapesPage() {
         }
       })
       updateUserStore(updatedUser)
-      navigate('/dashboard')
+      navigate('/recommendation')
     } catch (err) {
       console.error('Failed to save landscapes', err)
-      navigate('/dashboard')
+      navigate('/recommendation')
     } finally {
       setLoading(false)
     }
