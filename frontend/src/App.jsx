@@ -1,4 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
+import { useEffect } from 'react'
+import useAuthStore from './store/authStore'
 import IndexPage from './pages/IndexPage'
 import SignInPage from './pages/SignInPage'
 import SignUpPage from './pages/SignUpPage'
@@ -15,6 +17,21 @@ import DashboardLayout from './components/layout/DashboardLayout'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+  const isInitialized = useAuthStore((state) => state.isInitialized);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  if (!isInitialized) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
   return (
     <Routes>
       {/* Public Pages */}
