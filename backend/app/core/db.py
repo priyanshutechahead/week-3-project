@@ -1,12 +1,6 @@
 from pymongo import MongoClient
-from dotenv import load_dotenv
-import os
 import certifi
+from app.core.config import settings
 
-load_dotenv()
-
-MONGO_URL = os.getenv("MONGO_URL")
-DATABASE_NAME = os.getenv("DATABASE_NAME")
-
-client = MongoClient(MONGO_URL, tlsCAFile=certifi.where())
-db = client[DATABASE_NAME]
+client = MongoClient(settings.MONGO_URL, tlsCAFile=certifi.where())
+db = client[settings.DATABASE_NAME]
