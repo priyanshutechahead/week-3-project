@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import ChatAssistant from '../components/ui/ChatAssistant'
 import Footer from '../components/layout/Footer'
 import { getCountryByName, getAllCountries, getIntelligence } from '../api/countryAPI'
@@ -59,6 +59,7 @@ export default function DashboardPage() {
 
   const activeContent = aiIntelligence ? aiIntelligence[activeTab] : getFallbackContent(currentCountry)[activeTab]
 
+  const navigate = useNavigate()
   const location = useLocation()
 
   useEffect(() => {
@@ -246,7 +247,16 @@ export default function DashboardPage() {
           <div className="lg:col-span-5 flex flex-col gap-4">
             <div className="grid grid-cols-2 gap-4 flex-1">
               {['Must Visit', 'Hidden Gems', 'Local Eats', 'Active Life'].map((cat) => (
-                <div key={cat} className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition-shadow cursor-pointer">
+                <div
+                  key={cat}
+                  onClick={() => navigate('/explore', {
+                    state: {
+                      country: currentCountry,
+                      category: cat
+                    }
+                  })}
+                  className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition-shadow cursor-pointer"
+                >
                   <span className="material-symbols-outlined text-primary mb-2">explore</span>
                   <h4 className="font-medium">{cat}</h4>
                   <p className="text-label-caps text-on-surface-variant mt-1">Explore</p>
@@ -378,8 +388,8 @@ export default function DashboardPage() {
               <button
                 key={tab}
                 className={`px-4 py-2 rounded-full text-body-sm font-medium whitespace-nowrap transition-all ${activeTab === tab
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
                   }`}
                 onClick={() => setActiveTab(tab)}
               >

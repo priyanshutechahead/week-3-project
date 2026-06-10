@@ -13,8 +13,10 @@ import InterestSeasonsPage from './pages/onboarding/InterestSeasonsPage'
 import InterestFloraFaunaPage from './pages/onboarding/InterestFloraFaunaPage'
 import InterestLandscapesPage from './pages/onboarding/InterestLandscapesPage'
 import RecommendationDashboardPage from './pages/RecommendationDashboardPage'
+import CategoryPage from './pages/CategoryPage'
 import DashboardLayout from './components/layout/DashboardLayout'
 import ProtectedRoute from './components/ProtectedRoute'
+
 
 function App() {
   const checkAuth = useAuthStore((state) => state.checkAuth);
@@ -56,7 +58,9 @@ function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/intelligence" element={<IntelligencePage />} />
           <Route path="/itineraries" element={<ItinerariesPage />} />
+          <Route path="/explore" element={<CategoryPage />} />
         </Route>
+
       </Route>
     </Routes>
   )

@@ -1,5 +1,6 @@
 import os
 import json
+# pyrefly: ignore [missing-import]
 from groq import Groq
 from app.core.config import settings
 
@@ -38,7 +39,7 @@ class IntelligenceService:
         try:
             client = cls.get_client()
             completion = client.chat.completions.create(
-                model="llama3-8b-8192",
+                model="llama-3.1-8b-instant",
                 messages=[
                     {
                         "role": "user",
