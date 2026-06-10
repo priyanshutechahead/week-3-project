@@ -18,6 +18,7 @@ class Settings(BaseSettings):
         "http://localhost:5173",  # Vite default
         "http://localhost:3000",
         "http://127.0.0.1:5173",
+        "https://week-3-project-1.onrender.com"
     ]
 
     # Database
