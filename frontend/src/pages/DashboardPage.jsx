@@ -57,7 +57,12 @@ export default function DashboardPage() {
   const [currentCountry, setCurrentCountry] = useState(user?.interests?.countries?.[0] || 'Japan')
   const placesRef = useRef(null)
 
-  const activeContent = aiIntelligence ? aiIntelligence[activeTab] : getFallbackContent(currentCountry)[activeTab]
+  // Derive tabs dynamically from AI response or use default fallbacks
+  const dynamicTabs = aiIntelligence ? Object.keys(aiIntelligence) : tabs
+  
+  const activeContent = (aiIntelligence && aiIntelligence[activeTab]) 
+    ? aiIntelligence[activeTab] 
+    : (getFallbackContent(currentCountry)[activeTab] || Object.values(getFallbackContent(currentCountry))[0])
 
   const location = useLocation()
 
@@ -119,7 +124,14 @@ export default function DashboardPage() {
         ]);
 
         getTravelNews(currentCountry).then(data => setNews(data ? data.slice(0, 4) : [])).catch(e => console.error("News error", e));
-        getIntelligence(currentCountry).then(data => setAiIntelligence(data)).catch(e => console.error("AI error", e));
+        
+        // Load AI Intelligence and set the first tab as active
+        getIntelligence(currentCountry).then(data => {
+          if (data) {
+            setAiIntelligence(data);
+            setActiveTab(Object.keys(data)[0]);
+          }
+        }).catch(e => console.error("AI error", e));
 
         if (cData && cData.capital && cData.capital.length > 0) {
           getWeatherData(cData.capital[0]).then(wData => setWeather(wData)).catch(e => console.error("Weather error", e));
@@ -374,7 +386,7 @@ export default function DashboardPage() {
         <section className="mb-[24px]">
           <h3 className="font-headline-md text-headline-md text-on-surface mb-6">Why People Love {currentCountry}</h3>
           <div className="flex gap-2 mb-6 overflow-x-auto no-scrollbar">
-            {tabs.map(tab => (
+            {dynamicTabs.map(tab => (
               <button
                 key={tab}
                 className={`px-4 py-2 rounded-full text-body-sm font-medium whitespace-nowrap transition-all ${activeTab === tab

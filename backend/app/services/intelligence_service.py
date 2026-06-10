@@ -9,29 +9,24 @@ class IntelligenceService:
     @classmethod
     def get_client(cls):
         if not cls._client:
-            # Try settings first, then direct env fallback
             api_key = settings.GROQ_API_KEY or os.getenv("GROQ_API_KEY")
             if not api_key:
-                print("CRITICAL: GROQ_API_KEY not found in settings or environment")
                 raise ValueError("GROQ_API_KEY is not set")
             cls._client = Groq(api_key=api_key)
         return cls._client
 
     @classmethod
     async def get_country_intelligence(cls, country_name: str):
+        # Improved prompt: Let the AI decide the most relevant categories for each specific country
         prompt = f"""
-        Generate travel intelligence for {country_name} in JSON format.
-        Provide insights for exactly these 5 categories: 'Tech Innovation', 'Cultural Heritage', 'Food & Cuisine', 'Cleanliness', 'Safety'.
-        For each category, provide:
-        - 'title': A short catchy title.
-        - 'desc': A 2-sentence description.
-        - 'stats': A list of 2 objects with 'label' and 'value'.
+        Identify the 5 most unique and interesting travel-related characteristics or themes for {country_name}.
+        For each characteristic, provide a JSON object with:
+        - 'category': A short 1-2 word name (e.g., 'Volcanic Wonders', 'Nightlife', 'High-Speed Rail').
+        - 'title': A catchy headline.
+        - 'desc': A 2-sentence fascinating description.
+        - 'stats': A list of 2 objects with 'label' and 'value' that represent data or facts about this.
         
-        Structure:
-        {{
-          "Tech Innovation": {{ "title": "...", "desc": "...", "stats": [{{ "label": "...", "value": "..." }}, ...] }},
-          ...
-        }}
+        Return exactly 5 categories in a JSON object where the keys are the 'category' names.
         Only return the JSON object, no other text.
         """
         
@@ -45,7 +40,7 @@ class IntelligenceService:
                         "content": prompt
                     }
                 ],
-                temperature=0.5,
+                temperature=0.7,
                 max_tokens=1024,
                 top_p=1,
                 stream=False,
