@@ -54,7 +54,7 @@ export default function DashboardPage() {
   const [usdRate, setUsdRate] = useState(null)
 
   const user = useAuthStore((state) => state.user)
-  const [currentCountry, setCurrentCountry] = useState('Japan')
+  const [currentCountry, setCurrentCountry] = useState(user?.interests?.countries?.[0] || 'Japan')
   const placesRef = useRef(null)
 
   const activeContent = aiIntelligence ? aiIntelligence[activeTab] : getFallbackContent(currentCountry)[activeTab]
