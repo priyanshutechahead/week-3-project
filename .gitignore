@@ -89,3 +89,4 @@ temp/
 *.bak
 *.orig
 DOCS.md
+discoverly_fix_prompt.md
