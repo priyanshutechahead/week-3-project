@@ -1,12 +1,21 @@
 import os
 import json
 from groq import Groq
-from dotenv import load_dotenv
-
-load_dotenv()
+from app.core.config import settings
 
 class IntelligenceService:
-    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    _client = None
+
+    @classmethod
+    def get_client(cls):
+        if not cls._client:
+            # Try settings first, then direct env fallback
+            api_key = settings.GROQ_API_KEY or os.getenv("GROQ_API_KEY")
+            if not api_key:
+                print("CRITICAL: GROQ_API_KEY not found in settings or environment")
+                raise ValueError("GROQ_API_KEY is not set")
+            cls._client = Groq(api_key=api_key)
+        return cls._client
 
     @classmethod
     async def get_country_intelligence(cls, country_name: str):
@@ -27,7 +36,8 @@ class IntelligenceService:
         """
         
         try:
-            completion = cls.client.chat.completions.create(
+            client = cls.get_client()
+            completion = client.chat.completions.create(
                 model="llama3-8b-8192",
                 messages=[
                     {
@@ -43,5 +53,5 @@ class IntelligenceService:
             )
             return json.loads(completion.choices[0].message.content)
         except Exception as e:
-            print(f"Error calling Groq: {str(e)}")
+            print(f"Error calling Groq for {country_name}: {str(e)}")
             return None
