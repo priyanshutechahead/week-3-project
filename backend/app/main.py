@@ -6,6 +6,7 @@ from app.core.init_db import setup_indexes
 from app.api.routes import auth, users, countries, recommendations, saved
 from app.middlewares.logging import LoggingMiddleware
 from app.exceptions.handlers import global_exception_handler, pymongo_exception_handler
+from app.core.config import settings
 from pymongo.errors import PyMongoError
 
 @asynccontextmanager
@@ -17,7 +18,7 @@ async def lifespan(app: FastAPI):
     pass
 
 app = FastAPI(
-    title="Discoverly API",
+    title=settings.PROJECT_NAME,
     version="1.0.0",
     lifespan=lifespan
 )
@@ -30,7 +31,7 @@ app.add_exception_handler(PyMongoError, pymongo_exception_handler)
 app.add_middleware(LoggingMiddleware)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -45,16 +46,4 @@ app.include_router(saved.router)
 
 @app.get("/")
 def root():
-    return {"message": "Discoverly backend is running"}
-
-
-@app.get("/test-db")
-def test_db():
-    try:
-        db.test.insert_one({"status": "connected"})
-        return {"message": "MongoDB connected"}
-    except Exception as e:
-        return {
-            "message": "DB Connection failed",
-            "error": str(e)
-        }
+    return {"message": f"{settings.PROJECT_NAME} backend is running"}
