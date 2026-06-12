@@ -8,39 +8,11 @@ import { getWeatherData } from '../api/weather_service'
 import { getTravelNews } from '../api/news_service'
 import useAuthStore from '../store/authStore'
 
-const tabs = ['Tech Innovation', 'Cultural Heritage', 'Food & Cuisine', 'Cleanliness', 'Safety']
-
-const getFallbackContent = (country) => ({
-  'Tech Innovation': {
-    title: `Technology in ${country}`,
-    desc: `${country} is making significant strides in digital transformation and infrastructure development, fostering a unique tech ecosystem.`,
-    stats: [{ label: 'Innovation', value: 'High' }, { label: 'Tech Hubs', value: 'Growing' }],
-  },
-  'Cultural Heritage': {
-    title: `The Soul of ${country}`,
-    desc: `Experience the rich history and traditions that define ${country}, from historic landmarks to local craftsmanship.`,
-    stats: [{ label: 'UNESCO Sites', value: 'Multiple' }, { label: 'History', value: 'Ancient' }],
-  },
-  'Food & Cuisine': {
-    title: `A Taste of ${country}`,
-    desc: `The culinary scene in ${country} is a vibrant blend of traditional recipes and modern flavors.`,
-    stats: [{ label: 'Street Food', value: 'World Class' }, { label: 'Top Dish', value: 'Local Favorite' }],
-  },
-  'Cleanliness': {
-    title: 'Environmental Focus',
-    desc: `Commitment to sustainability and urban maintenance is a visible priority throughout ${country}.`,
-    stats: [{ label: 'Eco Index', value: 'Verified' }, { label: 'Air Quality', value: 'Monitored' }],
-  },
-  'Safety': {
-    title: 'Peace of Mind',
-    desc: `${country} maintains a welcoming environment with robust safety protocols for international travelers.`,
-    stats: [{ label: 'Safety Rank', value: 'Top Tier' }, { label: 'Crime Rate', value: 'Low' }],
-  },
-})
 
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState('Tech Innovation')
+  const [activeTab, setActiveTab] = useState(null)
   const [time, setTime] = useState('')
+  const [greeting, setGreeting] = useState('Good Morning')
   const [showModal, setShowModal] = useState(false)
   const [countryData, setCountryData] = useState(null)
   const [weather, setWeather] = useState(null)
@@ -57,12 +29,10 @@ export default function DashboardPage() {
   const [currentCountry, setCurrentCountry] = useState(user?.interests?.countries?.[0] || 'Japan')
   const placesRef = useRef(null)
 
-  // Derive tabs dynamically from AI response or use default fallbacks
-  const dynamicTabs = aiIntelligence ? Object.keys(aiIntelligence) : tabs
-  
-  const activeContent = (aiIntelligence && aiIntelligence[activeTab]) 
+  const dynamicTabs = aiIntelligence ? Object.keys(aiIntelligence) : []
+  const activeContent = (aiIntelligence && activeTab && aiIntelligence[activeTab]) 
     ? aiIntelligence[activeTab] 
-    : (getFallbackContent(currentCountry)[activeTab] || Object.values(getFallbackContent(currentCountry))[0])
+    : null
 
   const location = useLocation()
 
@@ -161,6 +131,12 @@ export default function DashboardPage() {
         }
       }
       setTime(targetTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }))
+      
+      const hour = targetTime.getHours()
+      if (hour < 12) setGreeting('Good Morning')
+      else if (hour < 17) setGreeting('Good Afternoon')
+      else if (hour < 21) setGreeting('Good Evening')
+      else setGreeting('Good Night')
     }
     updateTime()
     const interval = setInterval(updateTime, 1000)
@@ -196,7 +172,7 @@ export default function DashboardPage() {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-label-caps font-label-caps text-primary">CURATED FOR YOU</p>
-              <h2 className="font-headline-md text-headline-md text-on-surface mt-1">Good Morning, {user?.name?.split(' ')[0] || 'Explorer'}.</h2>
+              <h2 className="font-headline-md text-headline-md text-on-surface mt-1">{greeting}, {user?.name?.split(' ')[0] || 'Explorer'}.</h2>
             </div>
             <div className="relative">
               <div
@@ -385,32 +361,42 @@ export default function DashboardPage() {
 
         <section className="mb-[24px]">
           <h3 className="font-headline-md text-headline-md text-on-surface mb-6">Why People Love {currentCountry}</h3>
-          <div className="flex gap-2 mb-6 overflow-x-auto no-scrollbar">
-            {dynamicTabs.map(tab => (
-              <button
-                key={tab}
-                className={`px-4 py-2 rounded-full text-body-sm font-medium whitespace-nowrap transition-all ${activeTab === tab
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
-                  }`}
-                onClick={() => setActiveTab(tab)}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-8 transition-all">
-            <h4 className="font-headline-md text-headline-md text-on-surface mb-4">{activeContent.title}</h4>
-            <p className="text-body-lg text-on-surface-variant mb-6">{activeContent.desc}</p>
-            <div className="flex gap-6">
-              {activeContent.stats.map(stat => (
-                <div key={stat.label} className="bg-surface-container-low px-4 py-3 rounded-lg">
-                  <p className="text-label-caps text-on-surface-variant">{stat.label}</p>
-                  <p className="font-headline-md text-headline-md text-primary">{stat.value}</p>
-                </div>
-              ))}
+          
+          {!aiIntelligence || !activeContent ? (
+            <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-12 text-center">
+              <span className="material-symbols-outlined animate-spin text-primary text-4xl mb-4">progress_activity</span>
+              <p className="text-body-lg text-on-surface-variant">Generating personalized insights...</p>
             </div>
-          </div>
+          ) : (
+            <>
+              <div className="flex gap-2 mb-6 overflow-x-auto no-scrollbar">
+                {dynamicTabs.map(tab => (
+                  <button
+                    key={tab}
+                    className={`px-4 py-2 rounded-full text-body-sm font-medium whitespace-nowrap transition-all ${activeTab === tab
+                        ? 'bg-primary text-white shadow-sm'
+                        : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
+                      }`}
+                    onClick={() => setActiveTab(tab)}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+              <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-8 transition-all">
+                <h4 className="font-headline-md text-headline-md text-on-surface mb-4">{activeContent.title}</h4>
+                <p className="text-body-lg text-on-surface-variant mb-6">{activeContent.desc}</p>
+                <div className="flex gap-6">
+                  {activeContent.stats && activeContent.stats.map((stat, idx) => (
+                    <div key={idx} className="bg-surface-container-low px-4 py-3 rounded-lg">
+                      <p className="text-label-caps text-on-surface-variant">{stat.label}</p>
+                      <p className="font-headline-md text-headline-md text-primary">{stat.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </section>
 
         <section className="mb-[24px]">

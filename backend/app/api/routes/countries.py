@@ -3,6 +3,7 @@ from typing import List, Dict
 from app.schemas.country_schema import CountryOut
 from app.services.country_service import CountryService
 from app.services.intelligence_service import IntelligenceService
+from app.services.news_service import NewsService
 
 router = APIRouter(prefix="/countries", tags=["countries"])
 
@@ -22,4 +23,9 @@ async def get_intelligence(name: str):
     data = await IntelligenceService.get_country_intelligence(name)
     if not data:
         raise HTTPException(status_code=500, detail="Failed to distill intelligence")
+    return data
+
+@router.get("/news/{name}", response_model=List[Dict])
+async def get_news(name: str):
+    data = await NewsService.get_travel_news(name)
     return data
